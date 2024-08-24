@@ -2,6 +2,7 @@
 *                                                                                                            *
 * Author: Erick Chavez                                                                                       *
 * Created: June 12, 2024                                                                                     *
+* Last Modified: August 24th, 2024                                                                           *
 *                                                                                                            *
 * A simple program which emulates the "ls" UNIX command with the flags [-a], [-l], [-la]                     *
 *                                                                                                            *
@@ -29,20 +30,24 @@
 #define TCMD "-la"
 #define CRDIR "."
 
+// ***** ERROR-HANDLING ***** // 
 
 /**
- * @brief Perform a countdown from a given value.
  * 
- * @param value The value to start the countdown from.
+ * @brief Check for potential command-line errors.
+ * 
+ * @param *arg[] Index value for the given argument(s).
+ * @param pre Precondition - Command-line argument(s).
+ * 
  */
-void checkCmdErr(char *arg[]) {
-   // check if the argument is JUST a hyphen
+void checkCommandlineArgs(char *arg[]) {
+   // Check if it's JUST hyphen(-)
    if (strcmp(*arg, HYPHEN) == 0) {
       printf("%s\n", "Error: Invalid command flag. \nValid options: [-a] [-l] [-la].");
       exit(-1);
    }
    
-   // if the argument does include a hyphen (with a specified flag)
+   // If the argument does include a hyphen (with a specified flag)
    if (strstr(*arg, HYPHEN)) {
       // check if the flag is valid
       if ((strcmp(*arg, FCMD) != 0) && (strcmp(*arg, SCMD) != 0) && (strcmp(*arg, TCMD) != 0)) {
@@ -52,48 +57,44 @@ void checkCmdErr(char *arg[]) {
    }
 }
 
-/*
-
-Check whether or not an entry starts with a '.' character.
-
-entry[] - the given entry to check 
-
-
-returns 1 if it does start with a '.', otherwise return 0.
-*/ 
+/**
+ * 
+ * @brief A helper function used to ignore entries denoted as directories.
+ * 
+ * @param entry[] The current entry given from the specified directory.
+ * @return 1 if it's a directory, otherwise 0
+ * 
+ */
 int checkDot(char entry[]) {
    if (entry[0] == '.') {
       return 1;
    }
-
    return 0;
 }
 
-/*
-
-Check if the command-line argument is a path or not.
-
-*arg[] - the argument passed from the command-line
-
-returns 1 if it is a path, otherwise return 0.
-
-*/
-int isFlag(char *arg[]) {
-   if (strstr(*arg, HYPHEN)) {
+/**
+ * 
+ * @brief Check if the argument is a path.
+ * 
+ * @param index The index value of the command-line argument.
+ * @return 1 if it's a path, otherwise 0
+ * 
+ */
+int isPath(char *index[]) {
+   if (strstr(*index, HYPHEN)) {
       return 1;
    }
    return 0;
 }
 
-/*
-
-Check if the command-line argument is a directory or not.
-
-*arg[] - the argument passed from the command-line
-
-returns 1 if it is a directory, otherwise return 0.
-
-*/
+/**
+ * 
+ * @brief Check if command-line argument is a directory.
+ * 
+ * @param arg The argument value given by the entry.
+ * @return 1 if it's a directory, otherwise return 0.
+ * 
+ */
 int isDirectory(char *arg[]) {
    if (!(strstr(*arg, HYPHEN))) {
       return 1;
@@ -101,17 +102,19 @@ int isDirectory(char *arg[]) {
    return 0;
 }
 
-/*
+// ***** PRIMARY-FUNCTION ***** // 
 
-The primary function which executes the "ls" command.
-
-argc - the number of arguments given from the command-line.
-*argv[] - A string representation of the arguments given from the command-line.
-
-*/
+/**
+ * 
+ * @brief The primary function to execute the command.
+ * 
+ * @param argc Total number of arguments found in the command-line.
+ * @param argc String representation of the arguments given from the command-line.
+ * 
+ */
 void lsExtended(int argc, char *argv[]) {
    if (argc > 1) {
-      checkCmdErr(&argv[1]);
+      checkCommandlineArgs(&argv[1]);
    }
 
    // handle the case were no flag or path is provided
@@ -172,7 +175,7 @@ void lsExtended(int argc, char *argv[]) {
       }
 
       // check if it's a command flag
-      if (isFlag(&argv[1]) == 1) {
+      if (isPath(&argv[1]) == 1) {
 
          // check if its the first flag
          if (strcmp(argv[1], FCMD) == 0) {
